@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EducaLetra</title>
+
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+  <link rel="icon" href="imagem/logo.png" type="image/png" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .top-bar button.nav,
+    .btn-acao-topo,
+    button {
+      text-transform: capitalize;
+    }
+
+    /* Caixa de seleção múltipla de turmas para Professor */
+    .turmas-professor-box {
+      width: 100%;
+      background: #fff;
+      border: 1px solid #2e023f;
+      border-radius: 15px;
+      padding: 8px 14px;
+      margin-bottom: 8px;
+      text-align: left;
+      font-size: 13px;
+    }
+
+    .turmas-professor-box label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 4px 0;
+      cursor: pointer;
+      color: #333;
+    }
+
+    .turmas-professor-box input[type="checkbox"] {
+      width: auto !important;
+      margin: 0 !important;
+      accent-color: #7607aa;
+    }
+
+    /* Modal de Confirmação Roxo do EducaLetra */
+    .modal-confirmacao-roxo {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 4000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-confirmacao-roxo.ativo {
+      display: flex;
+    }
+
+    .modal-confirmacao-card {
+      background: #f8f5ee;
+      border: 3px solid #935394;
+      border-radius: 20px;
+      padding: 28px 32px;
+      max-width: 420px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 10px 25px rgba(84, 53, 131, 0.35);
+    }
+
+    .modal-confirmacao-card h4 {
+      color: #543583;
+      font-weight: bold;
+      margin-bottom: 12px;
+    }
+
+    .modal-confirmacao-card p {
+      color: #4a148c;
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: 20px;
+    }
+
+    .btn-ok-roxo {
+      background-color: #7607aa !important;
+      color: #fff !important;
+      border: none !important;
+      border-radius: 20px !important;
+      padding: 8px 30px !important;
+      width: auto !important;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .btn-ok-roxo:hover {
+      background-color: #6a1a93 !important;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="top-bar">
+    <div class="logo">
+      <img src="imagem/logoletra.png" alt="Logo do EducaLetra" />
+    </div>
+
+    <div class="subtitle">Brincando e aprendendo!</div>
+
+    <nav style="align-items: center;">
+      <button type="button" class="nav" onclick="reiniciarPagina()">Início</button>
+      <button type="button" class="nav" onclick="document.getElementById('footer').scrollIntoView({ behavior: 'smooth' })">Sobre</button>
+      <button type="button" class="nav" onclick="abrirPainelDireita('modalMateriais')">Materiais</button>
+      <button type="button" class="nav entrar" onclick="mostrarFormulario()">Entrar</button>
+
+      <button type="button" class="btn-acao-topo" onclick="abrirPainelDireita('modalNotificacoes')" title="Notificações" aria-label="Notificações">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+          <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2M8 1.918l-.797.161A4 4 0 0 0 4 6c0 .628-.134 2.197-.459 3.742-.16.767-.376 1.566-.663 2.258h10.244c-.287-.692-.502-1.49-.663-2.258C12.134 8.197 12 6.628 12 6a4 4 0 0 0-3.203-3.92zM14.22 12c.223.447.481.801.78 1H1c.299-.199.557-.553.78-1C2.68 10.2 3 6.88 3 6c0-2.42 1.72-4.44 4.005-4.901a1 1 0 1 1 1.99 0A5 5 0 0 1 13 6c0 .88.32 4.2 1.22 6"/>
+        </svg>
+      </button>
+      <button type="button" class="btn-acao-topo" onclick="abrirPainelDireita('modalPerfil')" title="Perfil" aria-label="Perfil">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+          <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z"/>
+        </svg>
+      </button>
+    </nav>
+  </div>
+
+  <div class="container">
+    <div class="left" id="leftSide">
+      <div class="intro-text" id="introText"></div>
+
+      <form class="formulario card p-4 shadow" id="formulario" novalidate>
+        <h3 id="formTitulo">Entrar</h3>
+
+        <div id="cadastroCampos" style="display: none; flex-direction: column; width: 100%; align-items: center;">
+          <div class="inputs" style="width: 100%;">
+            <input type="text" id="nome" class="form-control mb-2" placeholder="Nome" />
+            <input type="text" id="sobrenome" class="form-control mb-2" placeholder="Sobrenome" />
+          </div>
+
+          <input type="text" id="cpf" class="form-control mb-2" placeholder="CPF (opcional)" style="width: 100%;" />
+
+          <select id="tipo_usuario" class="form-select mb-2" style="border-radius: 20px; border: 1px solid #2e023f;" onchange="ajustarCamposPorTipo()">
+            <option value="aluno">Aluno</option>
+            <option value="professor">Professor</option>
+            <option value="responsavel">Responsável</option>
+          </select>
+
+          <!-- Turma única para Aluno -->
+          <select id="turma_id" class="form-select mb-2" style="border-radius: 20px; border: 1px solid #2e023f;">
+            <option value="1">Escola Municipal Nova Cruz - 1º Ano A (Matutino)</option>
+            <option value="2">Escola Municipal Nova Cruz - 1º Ano B (Vespertino)</option>
+          </select>
+
+          <!-- Múltiplas turmas para Professor -->
+          <div id="turmasProfessorBox" class="turmas-professor-box" style="display: none;">
+            <strong style="color:#543583; display:block; margin-bottom:4px;">Selecione suas turmas:</strong>
+            <label><input type="checkbox" name="turmas_prof" value="1"> 1º Ano A (Matutino)</label>
+            <label><input type="checkbox" name="turmas_prof" value="2"> 1º Ano B (Vespertino)</label>
+          </div>
+
+          <!-- Vínculo do aluno para Responsável -->
+          <input
+            type="text"
+            id="vinculo_aluno"
+            class="form-control mb-2"
+            placeholder="E-mail, Código ou CPF do Aluno"
+            style="width: 100%; display: none;"
+          />
+        </div>
+
+        <input type="text" id="email" class="form-control mb-2" placeholder="E-mail ou Código" style="width: 100%;" />
+        <input type="password" id="senha" class="form-control mb-2" placeholder="Senha" style="width: 100%;" />
+
+        <button type="submit" id="botaoForm" class="btn btn-primary w-50 mt-3">
+          Entrar
+        </button>
+
+        <p id="alternarTexto" class="mt-2">Não possui conta? <a href="#" id="alternarLink">Criar conta</a></p>
+        <p id="mensagemErro" class="erro text-danger" style="font-size: 13px; text-align: center;"></p>
+      </form>
+    </div>
+
+    <div class="right">
+      <div class="right-content">
+        <h1>Vamos <br /> aprender a ler e escrever!</h1>
+        <img src="imagem/blocoEduca.png" alt="Blocos ABC" class="abc-img" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Roxo de Confirmação de Cadastro -->
+  <div id="modalSucessoCadastro" class="modal-confirmacao-roxo">
+    <div class="modal-confirmacao-card">
+      <h4>Cadastro Concluído!</h4>
+      <p id="textoSucessoCadastro"></p>
+      <button type="button" class="btn-ok-roxo" onclick="fecharModalSucesso()">OK</button>
+    </div>
+  </div>
+
+  <footer id="footer">
+    <p>EducaLetra é um projeto voltado para a alfabetização infantil com atividades interativas, jogos e recursos educativos.</p>
+    <p>© 2025 EducaLetra. Todos os direitos reservados. Criado por Th e Ga.</p>
+  </footer>
+
+  <script src="painel_lateral.js"></script>
+
+  <script>
+    const formulario = document.getElementById("formulario");
+    const cadastroCampos = document.getElementById("cadastroCampos");
+    const formTitulo = document.getElementById("formTitulo");
+    const botaoForm = document.getElementById("botaoForm");
+    const alternarTexto = document.getElementById("alternarTexto");
+    const mensagemErro = document.getElementById("mensagemErro");
+    const campoEmail = document.getElementById("email");
+    const selectTipo = document.getElementById("tipo_usuario");
+    const selectTurma = document.getElementById("turma_id");
+    const turmasProfessorBox = document.getElementById("turmasProfessorBox");
+    const campoVinculoAluno = document.getElementById("vinculo_aluno");
+
+    let modoCadastro = false;
+
+    function mostrarModalSucesso(mensagem) {
+      document.getElementById("textoSucessoCadastro").textContent = mensagem;
+      document.getElementById("modalSucessoCadastro").classList.add("ativo");
+    }
+
+    function fecharModalSucesso() {
+      document.getElementById("modalSucessoCadastro").classList.remove("ativo");
+      modoCadastro = false;
+      formulario.reset();
+      atualizarInterfaceCadastro();
+    }
+
+    function mostrarFormulario() {
+      document.getElementById("introText").style.display = "none";
+      formulario.classList.add("active");
+    }
+
+    function reiniciarPagina() {
+      document.getElementById("introText").style.display = "block";
+      formulario.classList.remove("active");
+    }
+
+    function ajustarCamposPorTipo() {
+      if (!modoCadastro) {
+        campoEmail.placeholder = "E-mail ou Código";
+        return;
+      }
+
+      const tipo = selectTipo.value;
+      if (tipo === "aluno") {
+        campoEmail.placeholder = "E-mail (opcional para aluno)";
+        selectTurma.style.display = "block";
+        turmasProfessorBox.style.display = "none";
+        campoVinculoAluno.style.display = "none";
+      } else if (tipo === "responsavel") {
+        campoEmail.placeholder = "Seu E-mail";
+        selectTurma.style.display = "none";
+        turmasProfessorBox.style.display = "none";
+        campoVinculoAluno.style.display = "block";
+      } else {
+        campoEmail.placeholder = "Seu E-mail";
+        selectTurma.style.display = "none";
+        turmasProfessorBox.style.display = "block";
+        campoVinculoAluno.style.display = "none";
+      }
+    }
+
+    function alternarModo(e) {
+      if (e) e.preventDefault();
+      modoCadastro = !modoCadastro;
+      atualizarInterfaceCadastro();
+    }
+
+    function atualizarInterfaceCadastro() {
+      cadastroCampos.style.display = modoCadastro ? "flex" : "none";
+      formTitulo.textContent = modoCadastro ? "Criar Conta" : "Entrar";
+      botaoForm.textContent = modoCadastro ? "Criar Conta" : "Entrar";
+      alternarTexto.innerHTML = modoCadastro
+        ? 'Já tem conta? <a href="#" id="alternarLink">Entrar</a>'
+        : 'Não possui conta? <a href="#" id="alternarLink">Criar conta</a>';
+      mensagemErro.textContent = "";
+
+      ajustarCamposPorTipo();
+
+      const link = document.getElementById("alternarLink");
+      if (link) link.addEventListener("click", alternarModo);
+    }
+
+    formulario.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      mensagemErro.textContent = "Processando...";
+
+      const email = campoEmail.value.trim();
+      const senha = document.getElementById("senha").value.trim();
+      const tipo_usuario = selectTipo.value;
+
+      if (!modoCadastro) {
+        if (!email || !senha) {
+          mensagemErro.textContent = "Informe o e-mail ou código e a senha.";
+          return;
+        }
+      } else {
+        if (tipo_usuario !== "aluno" && !email) {
+          mensagemErro.textContent = "Informe o e-mail.";
+          return;
+        }
+        if (!senha) {
+          mensagemErro.textContent = "Informe a senha.";
+          return;
+        }
+      }
+
+      const formData = new FormData();
+      formData.append("email", email);
+      formData.append("senha", senha);
+
+      if (modoCadastro) {
+        const nome = document.getElementById("nome").value.trim();
+        const sobrenome = document.getElementById("sobrenome").value.trim();
+        const cpf = document.getElementById("cpf").value.trim();
+        const turma_id = selectTurma.value;
+        const vinculo_aluno = campoVinculoAluno.value.trim();
+
+        if (!nome || !sobrenome) {
+          mensagemErro.textContent = "Preencha nome e sobrenome.";
+          return;
+        }
+
+        if (tipo_usuario === "responsavel" && !vinculo_aluno) {
+          mensagemErro.textContent = "Informe o e-mail, código ou CPF do aluno para vincular.";
+          return;
+        }
+
+        if (tipo_usuario === "professor") {
+          const selecionadas = document.querySelectorAll('input[name="turmas_prof"]:checked');
+          if (selecionadas.length === 0) {
+            mensagemErro.textContent = "Selecione pelo menos uma turma.";
+            return;
+          }
+          selecionadas.forEach((cb) => formData.append("turmas_professor[]", cb.value));
+        }
+
+        formData.append("acao", "cadastrar");
+        formData.append("nome", `${nome} ${sobrenome}`);
+        formData.append("cpf", cpf);
+        formData.append("tipo_usuario", tipo_usuario);
+        formData.append("turma_id", turma_id);
+        formData.append("vinculo_aluno", vinculo_aluno);
+        formData.append("escola_id", "1");
+      } else {
+        formData.append("acao", "login");
+      }
+
+      try {
+        const resp = await fetch("api/auth.php", { method: "POST", body: formData });
+        const textoResposta = await resp.text();
+
+        let data;
+        try {
+          data = JSON.parse(textoResposta);
+        } catch (err) {
+          console.error("Resposta bruta do PHP:", textoResposta);
+          mensagemErro.textContent = "Erro no servidor PHP. Verifique se o Apache/PHP e MySQL estão ligados.";
+          return;
+        }
+
+        if (!data.sucesso) {
+          mensagemErro.textContent = data.mensagem;
+          return;
+        }
+
+        if (modoCadastro) {
+          mensagemErro.textContent = "";
+          mostrarModalSucesso(data.mensagem);
+        } else {
+          sessionStorage.setItem("usuarioLogado", JSON.stringify(data.usuario));
+          window.location.href = "jogos.html";
+        }
+      } catch (erroRede) {
+        console.error(erroRede);
+        mensagemErro.textContent = "Não foi possível conectar à API (api/auth.php).";
+      }
+    });
+
+    atualizarInterfaceCadastro();
+  </script>
+</body>
+</html>

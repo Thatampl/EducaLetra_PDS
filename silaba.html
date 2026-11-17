@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jogo de Sílabas</title>
+  <link rel="icon" href="imagem/logo.png" type="image/png" />
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0ece2;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+
+    .voltar {
+      background: #7607aa;
+      color: white;
+      padding: 8px 20px;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: bold;
+      align-self: flex-start;
+    }
+
+    .voltar:hover {
+      background: #6a1a93;
+    }
+
+    header {
+      background-color: #935394;
+      color: white;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+
+    #imagem {
+      max-width: 240px;
+      height: auto;
+      margin: 20px auto 12px auto;
+      border-radius: 10px;
+      border: 2px solid #935394;
+      display: block;
+    }
+
+    .btn-audio {
+      background-color: #7607aa;
+      color: white;
+      padding: 10px 24px;
+      font-size: 16px;
+      font-weight: bold;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      margin: 8px auto 15px auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: background-color 0.2s, transform 0.2s;
+    }
+
+    .btn-audio:hover {
+      background-color: #6a1a93;
+      transform: scale(1.05);
+    }
+
+    .sylables {
+      margin-top: 20px;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 28px;
+    }
+
+    .sylables button {
+      background: #d1c4e9;
+      border: none;
+      padding: 20px 30px;
+      font-size: 1.2em;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: .2s;
+    }
+
+    .sylables button:hover {
+      transform: scale(1.08);
+    }
+
+    .response {
+      margin-top: 25px;
+      font-size: 1.2em;
+      color: #333;
+    }
+
+    .word-preview {
+      margin-top: 20px;
+      font-weight: bold;
+      font-size: 1.6em;
+      color: #4a148c;
+    }
+
+    .btn-custom {
+      background-color: #65bd68;
+      color: white;
+      padding: 12px 24px;
+      font-size: 18px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+
+    @media (max-width: 768px) {
+      header h1 { font-size: 1.6em; }
+      .voltar { align-self: center; margin-bottom: 10px; }
+      #imagem { max-width: 55vw; }
+      .sylables button { padding: 15px 22px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="w-100">
+    <button class="voltar" onclick="window.location.href = 'mapasilaba.html'">Voltar</button>
+    <h1>EducaLetra</h1>
+    <p>Monte a palavra correta com as sílabas!</p>
+  </header>
+
+  <div class="container mt-4">
+    <img id="imagem" src="" alt="Imagem" class="img-fluid">
+
+    <div>
+      <button type="button" id="btnOuvirAudio" class="btn-audio" onclick="falarPalavraAtual()">
+        🔊 Ouvir Áudio
+      </button>
+    </div>
+
+    <div id="preview" class="word-preview"></div>
+
+    <div id="opcoes" class="sylables"></div>
+
+    <div id="mensagem" class="response"></div>
+
+    <button class="btn-custom" onclick="proximaPalavra()" id="btnProxima" style="display:none">Próxima Palavra</button>
+    <button class="btn-custom" onclick="reiniciar()" id="btnReiniciar" style="display:none">Tentar Novamente</button>
+
+    <button class="btn-custom" id="btnVoltar" onclick="voltarParaMapa()" style="display:none">
+      Voltar para Fases
+    </button>
+  </div>
+
+  <script>
+    const palavrasPorNivel = {
+      facil: [
+        { imagem: "gato.png", silabas: ["ga", "to"], correta: "gato" },
+        { imagem: "dado.png", silabas: ["da", "do"], correta: "dado" },
+        { imagem: "maçã.png", silabas: ["ma", "çã"], correta: "maçã" },
+        { imagem: "uva.png", silabas: ["u", "va"], correta: "uva" },
+        { imagem: "ovo.png", silabas: ["o", "vo"], correta: "ovo" },
+        { imagem: "vaca.png", silabas: ["va", "ca"], correta: "vaca" },
+        { imagem: "sapo.png", silabas: ["sa", "po"], correta: "sapo" },
+        { imagem: "mesa.png", silabas: ["me", "sa"], correta: "mesa" },
+        { imagem: "bola.png", silabas: ["bo", "la"], correta: "bola" },
+        { imagem: "casa.png", silabas: ["ca", "sa"], correta: "casa" }
+      ],
+      normal: [
+        { imagem: "lápis.png", silabas: ["lá", "pis"], correta: "lápis" },
+        { imagem: "xicara.png", silabas: ["xí", "ca", "ra"], correta: "xícara" },
+        { imagem: "janela.png", silabas: ["ja", "ne", "la"], correta: "janela" },
+        { imagem: "zebra.png", silabas: ["ze", "bra"], correta: "zebra" },
+        { imagem: "coruja.png", silabas: ["co", "ru", "ja"], correta: "coruja" },
+        { imagem: "camisa.png", silabas: ["ca", "mi", "sa"], correta: "camisa" },
+        { imagem: "jacaré.png", silabas: ["ja", "ca", "ré"], correta: "jacaré" },
+        { imagem: "caderno.png", silabas: ["ca", "der", "no"], correta: "caderno" }
+      ],
+      dificil: [
+        { imagem: "mochila.png", silabas: ["mo", "chi", "la"], correta: "mochila" },
+        { imagem: "teclado.png", silabas: ["te", "cla", "do"], correta: "teclado" },
+        { imagem: "elefante.png", silabas: ["e", "le", "fan", "te"], correta: "elefante" },
+        { imagem: "borboleta.png", silabas: ["bor", "bo", "le", "ta"], correta: "borboleta" },
+        { imagem: "computador.png", silabas: ["com", "pu", "ta", "dor"], correta: "computador" },
+        { imagem: "bicicleta.png", silabas: ["bi", "ci", "cle", "ta"], correta: "bicicleta" },
+        { imagem: "brinquedo.png", silabas: ["brin", "que", "do"], correta: "brinquedo" },
+        { imagem: "professor.png", silabas: ["pro", "fes", "sor"], correta: "professor" },
+        { imagem: "dinossauro.png", silabas: ["di", "nos", "sau", "ro"], correta: "dinossauro" },
+        { imagem: "ventilador.png", silabas: ["ven", "ti", "la", "dor"], correta: "ventilador" }
+      ]
+    };
+
+    let palavrasSelecionadas = [];
+    let indice = 0;
+    let tentativa = [];
+    let acertos = 0;
+    let erros = 0;
+
+    function falarTexto(texto) {
+      if (!("speechSynthesis" in window) || !texto) return;
+      window.speechSynthesis.cancel();
+      const fala = new SpeechSynthesisUtterance(texto);
+      fala.lang = "pt-BR";
+      fala.rate = 0.85;
+      fala.pitch = 1.1;
+      window.speechSynthesis.speak(fala);
+    }
+
+    function falarPalavraAtual() {
+      const palavra = palavrasSelecionadas[indice];
+      if (palavra) falarTexto(palavra.correta);
+    }
+
+    function embaralhar(array) {
+      return array.sort(() => Math.random() - 0.5);
+    }
+
+    function carregarJogo() {
+      tentativa = [];
+      const palavra = palavrasSelecionadas[indice];
+
+      document.getElementById('btnProxima').style.display = "none";
+      document.getElementById('imagem').src = `imagem/${palavra.imagem}`;
+      document.getElementById('mensagem').innerText = "";
+      document.getElementById('preview').innerText = "";
+
+      const opcoes = embaralhar([...palavra.silabas]);
+      const container = document.getElementById('opcoes');
+      container.innerHTML = "";
+
+      opcoes.forEach(s => {
+        const btn = document.createElement("button");
+        btn.innerText = s;
+        btn.classList.add("silaba-btn");
+
+        btn.onclick = () => {
+          btn.disabled = true;
+          falarTexto(s);
+
+          tentativa.push(s);
+          document.getElementById('preview').innerText = tentativa.join('');
+
+          if (tentativa.join('') === palavra.correta) {
+            document.getElementById('mensagem').innerText = "✅ Parabéns! Você acertou!";
+            acertos++;
+            document.querySelectorAll(".silaba-btn").forEach(b => b.disabled = true);
+            document.getElementById('btnProxima').style.display = "inline";
+          } else if (tentativa.join('').length >= palavra.correta.length) {
+            document.getElementById('mensagem').innerText = "❌ Quase lá!";
+            document.querySelectorAll(".silaba-btn").forEach(b => b.disabled = true);
+            document.getElementById('btnProxima').style.display = "inline";
+            tentativa = [];
+            erros++;
+          }
+        };
+
+        container.appendChild(btn);
+      });
+    }
+
+    function proximaPalavra() {
+      indice++;
+      if (indice >= palavrasSelecionadas.length) {
+        mostrarResumo();
+      } else {
+        carregarJogo();
+      }
+    }
+
+    function mostrarResumo() {
+      document.getElementById('imagem').style.display = "none";
+      document.getElementById('btnOuvirAudio').style.display = "none";
+      document.getElementById('opcoes').innerHTML = "";
+      document.getElementById('preview').innerText = "";
+      document.getElementById('mensagem').innerHTML = `
+        <h3>🎉 Fim do jogo!</h3>
+        <p>✔️ Acertos: <strong>${acertos}</strong></p>
+        <p>❌ Erros: <strong>${erros}</strong></p>
+      `;
+      document.getElementById('btnProxima').style.display = "none";
+      document.getElementById('btnReiniciar').style.display = "inline";
+      document.getElementById('btnVoltar').style.display = "inline";
+
+      const params = new URLSearchParams(window.location.search);
+      const faseAtual = parseInt(params.get("fase") || "1");
+
+      fetch("api/registrar_desempenho.php", {
+        method: "POST",
+        body: new URLSearchParams({
+          jogo_id: 2,
+          fase: faseAtual,
+          acertos: acertos,
+          erros: erros
+        })
+      }).catch(() => {});
+    }
+
+    function reiniciar() {
+      const params = new URLSearchParams(window.location.search);
+      const fase = parseInt(params.get("fase") || "1");
+
+      let nivel = "facil";
+      if (fase >= 5 && fase <= 7) nivel = "normal";
+      if (fase >= 8) nivel = "dificil";
+
+      const palavrasDoNivel = [...palavrasPorNivel[nivel]];
+      palavrasSelecionadas = embaralhar(palavrasDoNivel).slice(0, 5);
+
+      indice = 0;
+      acertos = 0;
+      erros = 0;
+
+      document.getElementById('imagem').style.display = "block";
+      document.getElementById('btnOuvirAudio').style.display = "inline-flex";
+      document.getElementById('btnProxima').style.display = "none";
+      document.getElementById('btnReiniciar').style.display = "none";
+      document.getElementById('btnVoltar').style.display = "none";
+
+      carregarJogo();
+    }
+
+    reiniciar();
+
+    function voltarParaMapa() {
+      window.location.href = "mapasilaba.html";
+    }
+  </script>
+</body>
+</html>
